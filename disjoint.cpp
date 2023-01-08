@@ -1,78 +1,163 @@
-#include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
+#include <bits/stdc++.h> 
+using namespace std; 
+  
+
+class DisjointUnionSets 
+{ 
+      
+    vector<int> rank, parent; 
+    int n; 
+      
+    public: 
+    DisjointUnionSets(int n) 
+    { 
+        rank.resize(n); 
+        parent.resize(n); 
+        this->n = n; 
+        makeSet(); 
+    } 
+  
+    void makeSet() 
+    { 
+         
+        for (int i = 0; i < n; i++) 
+            parent[i] = i; 
+    } 
+  
  
-#define ROW 5
-#define COL 5
- 
-// A function to check if a given cell (row, col) can be
-// included in DFS
-int isSafe(int M[][COL], int row, int col,
-           bool visited[][COL])
-{
-    // row number is in range, column number is in range and
-    // value is 1 and not yet visited
-    return (row >= 0) && (row < ROW) && (col >= 0)
-           && (col < COL)
-           && (M[row][col] && !visited[row][col]);
-}
- 
-// A utility function to do DFS for a 2D boolean matrix. It
-// only considers the 8 neighbours as adjacent vertices
-void DFS(int M[][COL], int row, int col,
-         bool visited[][COL])
-{
-    // These arrays are used to get row and column numbers
-    // of 8 neighbours of a given cell
-    static int rowNbr[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
-    static int colNbr[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
- 
-    // Mark this cell as visited
-    visited[row][col] = true;
- 
-    // Recur for all connected neighbours
-    for (int k = 0; k < 8; ++k)
-        if (isSafe(M, row + rowNbr[k], col + colNbr[k],
-                   visited))
-            DFS(M, row + rowNbr[k], col + colNbr[k],
-                visited);
-}
- 
-// The main function that returns count of islands in a
-// given boolean 2D matrix
-int countIslands(int M[][COL])
-{
-    // Make a bool array to mark visited cells.
-    // Initially all cells are unvisited
-    bool visited[ROW][COL];
-    memset(visited, 0, sizeof(visited));
- 
-    // Initialize count as 0 and traverse through the all
-    // cells of given matrix
-    int count = 0;
-    for (int i = 0; i < ROW; ++i)
-        for (int j = 0; j < COL; ++j)
-            if (M[i][j] && !visited[i][j]) // If a cell with
-                                           // value 1 is not
-            { // visited yet, then new island found
-                DFS(M, i, j, visited); // Visit all cells in
-                                       // this island.
-                ++count; // and increment island count
-            }
- 
-    return count;
-}
- 
-// Driver program to test above function
-int main()
-{
-    int M[][COL] = { { 1, 1, 0, 0, 0 },
-                     { 0, 1, 0, 0, 1 },
-                     { 1, 0, 0, 1, 1 },
-                     { 0, 0, 0, 0, 0 },
-                     { 1, 0, 1, 0, 1 } };
- 
-    printf("Number of islands is: %d\n", countIslands(M));
- 
-    return 0;
+    int find(int x) 
+    { 
+        if (parent[x] != x) 
+        { 
+            
+            return find(parent[x]); 
+        } 
+  
+        return x; 
+    } 
+  
+    
+    void Union(int x, int y) 
+    { 
+        
+        int xRoot = find(x); 
+        int yRoot = find(y); 
+  
+       
+        if (xRoot == yRoot) 
+            return; 
+  
+        
+        if (rank[xRoot] < rank[yRoot]) 
+            parent[xRoot] = yRoot; 
+  
+        
+        else if (rank[yRoot] < rank[xRoot]) 
+            parent[yRoot] = xRoot; 
+  
+        else 
+        { 
+            
+            parent[yRoot] = xRoot; 
+  
+            
+            rank[xRoot] = rank[xRoot] + 1; 
+        } 
+    } 
+}; 
+  
+
+int countIslands(vector<vector<int>>a) 
+{ 
+    int n = a.size(); 
+    int m = a[0].size(); 
+  
+    DisjointUnionSets *dus = new DisjointUnionSets(n * m); 
+  
+  
+    for (int j = 0; j < n; j++) 
+    { 
+        for (int k = 0; k < m; k++) 
+        { 
+          
+            if (a[j][k] == 0) 
+                continue; 
+  
+            
+            if (j + 1 < n && a[j + 1][k] == 1) 
+                dus->Union(j * (m) + k,  
+                          (j + 1) * (m) + k); 
+            if (j - 1 >= 0 && a[j - 1][k] == 1) 
+                dus->Union(j * (m) + k,  
+                          (j - 1) * (m) + k); 
+            if (k + 1 < m && a[j][k + 1] == 1) 
+                dus->Union(j * (m) + k,  
+                          (j) * (m) + k + 1); 
+            if (k - 1 >= 0 && a[j][k - 1] == 1) 
+                dus->Union(j * (m) + k, 
+                          (j) * (m) + k - 1); 
+            if (j + 1 < n && k + 1 < m &&  
+                    a[j + 1][k + 1] == 1) 
+                dus->Union(j * (m) + k,  
+                          (j + 1) * (m) + k + 1); 
+            if (j + 1 < n && k - 1 >= 0 &&  
+                    a[j + 1][k - 1] == 1) 
+                dus->Union(j * m + k,  
+                          (j + 1) * (m) + k - 1); 
+            if (j - 1 >= 0 && k + 1 < m &&  
+                     a[j - 1][k + 1] == 1) 
+                dus->Union(j * m + k,  
+                          (j - 1) * m + k + 1); 
+            if (j - 1 >= 0 && k - 1 >= 0 &&  
+                     a[j - 1][k - 1] == 1) 
+                dus->Union(j * m + k,  
+                          (j - 1) * m + k - 1); 
+        } 
+    } 
+  
+    int *c = new int[n * m]; 
+    int numberOfIslands = 0; 
+    for (int j = 0; j < n; j++) 
+    { 
+        for (int k = 0; k < m; k++) 
+        { 
+            if (a[j][k] == 1) 
+            { 
+                int x = dus->find(j * m + k); 
+  
+                
+                if (c[x] == 0) 
+                { 
+                    numberOfIslands++; 
+                    c[x]++; 
+                } 
+  
+                else
+                    c[x]++; 
+            } 
+        } 
+    } 
+    return numberOfIslands; 
+} 
+  
+
+int main(void) 
+{ 
+    vector<vector<int>>a = {{1, 1, 0, 0, 0}, 
+                            {0, 1, 0, 0, 1}, 
+                            {1, 0, 0, 1, 1}, 
+                            {0, 0, 0, 0, 0}, 
+                            {1, 0, 1, 0, 1}}; 
+     cout<<"Given input"<<endl;
+     for(int i=0;i<a.size();i++)
+     {
+      for(int j=0;j<a[0].size();j++)
+      {
+      cout<<a[i][j]<<" ";
+       }
+       cout<<endl;
+      }
+      
+    cout << "Number of Islands is: " 
+         << countIslands(a) << endl; 
 }
